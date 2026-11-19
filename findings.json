@@ -1,0 +1,73 @@
+{
+  "file": "input.js",
+  "functions": [
+    {
+      "name": null,
+      "function_type": "arrow_function",
+      "parameters": "(card)",
+      "returns": [
+        "card.addEventListener(\"click\", flip)"
+      ]
+    },
+    {
+      "name": "flip",
+      "function_type": "function_declaration",
+      "parameters": "()",
+      "returns": []
+    },
+    {
+      "name": "checkIt",
+      "function_type": "function_declaration",
+      "parameters": "(check)",
+      "returns": []
+    },
+    {
+      "name": "success",
+      "function_type": "arrow_function",
+      "parameters": "()",
+      "returns": [
+        "{\n \n   firstCard.removeEventListener('click',File);\n  secondCard.removeEventListener('click',File);\n   reset()\n\n}"
+      ]
+    },
+    {
+      "name": "fail",
+      "function_type": "arrow_function",
+      "parameters": "()",
+      "returns": [
+        "{\nsetTimeout( () => {\n  firstCard.classList.remove(\"flip\");\n  secondCard.classList.remove(\"flip\");\n   reset()\n}, 1000)\n}"
+      ]
+    },
+    {
+      "name": null,
+      "function_type": "arrow_function",
+      "parameters": "()",
+      "returns": [
+        "{\n  firstCard.classList.remove(\"flip\");\n  secondCard.classList.remove(\"flip\");\n   reset()\n}"
+      ]
+    },
+    {
+      "name": null,
+      "function_type": "arrow_function",
+      "parameters": "()",
+      "returns": [
+        "{\n   isFlipped = false;\n   firstCard = null;\n   secondCard = null;\n\n}"
+      ]
+    },
+    {
+      "name": "shuffle",
+      "function_type": "function_expression",
+      "parameters": "()",
+      "returns": []
+    },
+    {
+      "name": null,
+      "function_type": "arrow_function",
+      "parameters": "(card)",
+      "returns": [
+        "{\n    var index = Math.floor(Math.random()* 16);\n      card.style.order = index;\n  }"
+      ]
+    }
+  ],
+  "imports": [],
+  "function calls": []
+}

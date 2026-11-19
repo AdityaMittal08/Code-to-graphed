@@ -1,75 +1,125 @@
 import tree_sitter_javascript as tsJavascript
 from tree_sitter import Language, Parser
+from pathlib import Path
+import json
 
 JS_Language = Language(tsJavascript.language())
 
 parser = Parser(JS_Language)
 
-with open("input.js", "rb") as file:
-  source_code = file.read()
+folder = Path(__file__).parent / "js_files"
 
-tree = parser.parse(source_code)
+for file_path in folder.glob("*.js"):
 
-root_node = tree.root_node
+  with open(file_path, "rb") as file:
+    source_code = file.read()
 
-def print_functions(node):
+  tree = parser.parse(source_code)
+
+  root_node = tree.root_node
+
+  findings ={
+    "file": file_path.name,
+    "functions": [],
+    "imports": [],
+    "function calls": [],
+  }
+
   function_types = [
-        "function_declaration",
-        "function_expression",
-        "generator_function_declaration",
-        "generator_function",
-        "method_definition"
-    ]
+    "function_declaration",
+    "function_expression",
+    "generator_function_declaration",
+    "generator_function",
+    "method_definition",
+    "arrow_function"
+  ]
 
-  if(node.type in function_types):
-    print("Function type: ", node.type)
-    name_node = node.child_by_field_name("name")
+  def getReturnStatment(node, returns):
+    if node.type == "return_statement":
+      if node.named_children:
+        return_node = node.named_children[0]
 
-    if(name_node):
-      function_name = source_code[
-        name_node.start_byte:name_node.end_byte
-      ].decode("utf8")
-
-      print("Function name: ",function_name)
-
-    else:
-      print("Function name: Anonymous or assigned externally")
-
-    parameters = node.child_by_field_name("parameters")
-    
-    if parameters:
-        params = source_code[
-            parameters.start_byte:parameters.end_byte
+        expression = source_code[
+          return_node.start_byte:return_node.end_byte
         ].decode("utf8")
+
+        returns.append(expression)
+      return
     
-    print("Parameters:", params)
+    if node.type in function_types:
+      return
 
-  if node.type == "arrow_function":
-     parent = node.parent
-     if(parent and parent.type == "variable_declarator"):
-        print("Function name:", node.type)
-        name_node = parent.child_by_field_name("name")
+    for child in node.children:
+      getReturnStatment(child, returns)   
 
-        if(name_node):
-          function_name = source_code[
-            name_node.start_byte:name_node.end_byte
+  def print_functions(node):
+
+    if(node.type in function_types):
+
+      function_name = None
+      params = None
+      returns = []
+
+      name_node = node.child_by_field_name("name")
+
+      if(name_node):
+
+        function_name = source_code[
+          name_node.start_byte:name_node.end_byte
+        ].decode("utf8")
+
+      elif(node.type == "arrow_function"):
+         parent = node.parent
+
+         if parent and parent.type == "variable_declarator":
+            name_node = parent.child_by_field_name("name")
+
+            if name_node:
+               function_name = source_code[
+                    name_node.start_byte:name_node.end_byte
+                ].decode("utf8") 
+
+      parameters = node.child_by_field_name("parameters")
+      
+      if parameters:
+          params = source_code[
+              parameters.start_byte:parameters.end_byte
           ].decode("utf8")
-    
-          print("Function name: ",function_name)
+      
+      else:
+         parameter = node.child_by_field_name("parameter")
 
-        else:
-              print("Function name: Anonymous or assigned externally")
-
-
-        parameters = node.child_by_field_name("parameters")
-    
-        if parameters:
+         if parameter:
             params = source_code[
-                parameters.start_byte:parameters.end_byte
+              parameter.start_byte:parameter.end_byte
             ].decode("utf8")
-        
-        print("Parameters:", params)
 
-  for child in node.children:
-        print_functions(child)
-print_functions(root_node)
+
+      body = node.child_by_field_name("body")
+
+      if body:
+        if node.type == "arrow_function" and body.type != "statment_block":
+
+          expression = source_code[
+              body.start_byte:body.end_byte
+          ].decode("utf8")
+
+          returns.append(expression)
+        else:
+         getReturnStatment(node, returns)
+
+      findings["functions"].append({
+         "name": function_name,
+         "function_type": node.type,
+         "parameters": params,
+         "returns": returns
+      })
+
+    for child in node.children:
+          print_functions(child)
+
+  print_functions(root_node)
+
+
+  with open("findings.json", "w") as file:
+     json.dump(findings, file, indent=2)
