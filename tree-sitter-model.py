@@ -120,6 +120,23 @@ for file_path in folder.glob("*.js"):
 
   print_functions(root_node)
 
+  # def print_imports(node):
+  #     if(node.type == "import_statement"):
+  #       import_info = {
+  #           "source": None,
+  #           "imports": []
+  #       }
+
+  #       source_node = node.child_by_field_name("source")
+
+  #       if source_node:
+  #         source = source_code[
+  #           source_node.start_byte:source_node.end_byte
+  #         ].decode("utf8")
+
+  #         import_info["source"] = source[1:-1]
+
+  #     source_node = node.child_by_field_name("source")
 
   with open("findings.json", "w") as file:
      json.dump(findings, file, indent=2)
